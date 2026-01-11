@@ -28,10 +28,6 @@ export default function Home() {
               <span className="text-sm text-gray-700 dark:text-gray-300">Niet vol</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-4 h-4 bg-orange-500 rounded-full"></span>
-              <span className="text-sm text-gray-700 dark:text-gray-300">Halfvol</span>
-            </div>
-            <div className="flex items-center gap-2">
               <span className="w-4 h-4 bg-red-500 rounded-full"></span>
               <span className="text-sm text-gray-700 dark:text-gray-300">Vol</span>
             </div>

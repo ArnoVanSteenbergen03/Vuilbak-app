@@ -1,19 +1,19 @@
 // app/api/trash-status/test/route.ts
 import { NextResponse } from 'next/server';
-
-let testStatus = { isFull: false, distance: 50 };
+import { getLatestStatus, setLatestStatus } from '@/lib/status';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const action = searchParams.get('action');
 
   if (action === 'full') {
-    testStatus = { isFull: true, distance: 15 };
+    setLatestStatus({ isFull: true, distance: 15 });
   } else if (action === 'empty') {
-    testStatus = { isFull: false, distance: 50 };
+    setLatestStatus({ isFull: false, distance: 50 });
   } else if (action === 'halfway') {
-    testStatus = { isFull: false, distance: 35 };
+    setLatestStatus({ isFull: false, distance: 35 });
   }
 
-  return NextResponse.json(testStatus);
+  const status = getLatestStatus();
+  return NextResponse.json(status);
 }

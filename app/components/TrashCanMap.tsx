@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import Link from 'next/link';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -30,147 +31,52 @@ export interface TrashCan {
   location: string;
   lat: number;
   lng: number;
-  status: 'Vol' | 'Niet vol' | 'Halfvol';
+  status: string;
   lastUpdated: string;
 }
 
-const baseTrashCans: TrashCan[] = [
-  {
-    id: 1,
-    location: 'Gravensteenstraat',
-    lat: 51.0568,
-    lng: 3.7192,
-    status: 'Niet vol',
-    lastUpdated: '2025-12-17',
-  },
-  {
-    id: 2,
-    location: 'Korenmarkt',
-    lat: 51.0543,
-    lng: 3.7205,
-    status: 'Vol',
-    lastUpdated: '2025-12-17',
-  },
-  {
-    id: 3,
-    location: 'Citadelpark',
-    lat: 51.0398,
-    lng: 3.7103,
-    status: 'Halfvol',
-    lastUpdated: '2025-12-17',
-  },
-  {
-    id: 4,
-    location: 'Sint-Pietersplein',
-    lat: 51.0475,
-    lng: 3.7268,
-    status: 'Niet vol',
-    lastUpdated: '2025-12-17',
-  },
-  {
-    id: 5,
-    location: 'Vrijdagmarkt',
-    lat: 51.0589,
-    lng: 3.7243,
-    status: 'Halfvol',
-    lastUpdated: '2025-12-17',
-  },
-  {
-    id: 6,
-    location: 'Gentbrugge Meersen',
-    lat: 51.0358,
-    lng: 3.7565,
-    status: 'Vol',
-    lastUpdated: '2025-12-17',
-  },
-];
-
-const getStatusColor = (status: TrashCan['status']) => {
-  switch (status) {
-    case 'Vol':
-      return 'text-red-600 font-semibold';
-    case 'Halfvol':
-      return 'text-orange-500 font-semibold';
-    case 'Niet vol':
-      return 'text-green-600 font-semibold';
+const getStatusColor = (status: string) => {
+  const statusLower = status.toLowerCase();
+  if (statusLower.includes('vol') || statusLower === 'full') {
+    return 'text-red-600 font-semibold';
   }
+  return 'text-green-600 font-semibold';
 };
 
-type TrashStatusResponse = {
-  isFull: boolean;
-  distance: number | null;
-};
+type TrashCanResponse = TrashCan[];
 
 export default function TrashCanMap() {
-  const [trashCans, setTrashCans] = useState<TrashCan[]>(baseTrashCans);
-  const [testMode, setTestMode] = useState(false);
+  const [trashCans, setTrashCans] = useState<TrashCan[]>([]);
 
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const res = await fetch(testMode ? '/api/trash-status/test' : '/api/trash-status');
-        const data: TrashStatusResponse = await res.json();
-
-        const newStatus: TrashCan['status'] = data.isFull ? 'Vol' : 'Niet vol';
-        const updatedDate = new Date().toISOString().slice(0, 10);
-
-        setTrashCans((prev) =>
-          prev.map((t) => ({
-            ...t,
-            status: newStatus,
-            lastUpdated: updatedDate,
-          })),
-        );
+        console.log('[TrashCanMap] Fetching trash cans...');
+        const res = await fetch('/api/trash-status');
+        const data: TrashCanResponse = await res.json();
+        
+        console.log('[TrashCanMap] Fetched trash cans:', data);
+        setTrashCans(data);
       } catch (e) {
-        console.error('Failed to fetch trash status', e);
+        console.error('[TrashCanMap] Failed to fetch trash status', e);
       }
     };
 
     fetchStatus();
-    const id = setInterval(fetchStatus, 1000);
+    const id = setInterval(fetchStatus, 5000);
     return () => clearInterval(id);
-  }, [testMode]);
+  }, []);
 
   return (
     <div className="w-full space-y-4">
-      {testMode && (
-        <div className="bg-blue-100 p-4 rounded-lg border border-blue-300">
-          <h3 className="font-bold mb-2">Test Mode</h3>
-          <div className="flex gap-2">
-            <button
-              onClick={() => fetch('/api/trash-status/test?action=full')}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-            >
-              Set FULL
-            </button>
-            <button
-              onClick={() => fetch('/api/trash-status/test?action=halfway')}
-              className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
-            >
-              Set HALFWAY
-            </button>
-            <button
-              onClick={() => fetch('/api/trash-status/test?action=empty')}
-              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-            >
-              Set EMPTY
-            </button>
-          </div>
-        </div>
-      )}
-
-      <div className="flex items-center gap-2 mb-2">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={testMode}
-            onChange={(e) => setTestMode(e.target.checked)}
-            className="w-4 h-4"
-          />
-          <span className="text-sm font-medium">Test Mode (no Arduino)</span>
-        </label>
+      <div className="flex justify-end">
+        <Link
+          href="/admin"
+          className="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition font-medium shadow-md"
+        >
+          🔧 Admin Panel
+        </Link>
       </div>
-
       <div className="w-full h-[600px] rounded-lg overflow-hidden shadow-lg">
       <MapContainer
         center={[51.0543, 3.7174]}
@@ -207,7 +113,7 @@ export default function TrashCanMap() {
           </Marker>
         ))}
       </MapContainer>
-    </div>
+      </div>
     </div>
   );
 }
