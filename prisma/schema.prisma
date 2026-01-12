@@ -1,0 +1,20 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model TrashCan {
+  id        Int     @id
+  location  String
+  lat       Float
+  lng       Float
+  status    String  @default("empty")
+  lastUpdated String @default("")
+
+  @@map("trash_cans")
+}
