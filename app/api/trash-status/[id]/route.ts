@@ -1,7 +1,8 @@
 // app/api/trash-status/[id]/route.ts
 import { NextResponse } from 'next/server';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync } from 'fs';
 import { join } from 'path';
+import { kv } from '@vercel/kv';
 
 interface TrashCan {
   id: number;
@@ -22,11 +23,17 @@ export async function PUT(
     
     console.log(`[PUT /api/trash-status/${id}] Updating trash can ${id} with status: ${body.status}`);
     
-    const filePath = join(process.cwd(), 'data', 'trashcans.json');
-    const fileContent = readFileSync(filePath, 'utf-8');
-    const trashCans: TrashCan[] = JSON.parse(fileContent);
+    // Get current data from KV or JSON file
+    let trashCans: TrashCan[] = await kv.get('trashcans') as TrashCan[];
     
-    console.log(`[PUT /api/trash-status/${id}] Loaded trashcans from file:`, trashCans.map(t => t.id));
+    if (!trashCans) {
+      console.log(`[PUT /api/trash-status/${id}] KV cache empty, loading from JSON file...`);
+      const filePath = join(process.cwd(), 'data', 'trashcans.json');
+      const fileContent = readFileSync(filePath, 'utf-8');
+      trashCans = JSON.parse(fileContent);
+    }
+    
+    console.log(`[PUT /api/trash-status/${id}] Loaded trashcans:`, trashCans.map(t => t.id));
     
     // Find and update the trash can (convert id to number for comparison)
     const numericId = parseInt(id, 10);
@@ -48,8 +55,8 @@ export async function PUT(
     trashCans[trashCanIndex].status = body.status;
     trashCans[trashCanIndex].lastUpdated = new Date().toISOString().split('T')[0];
     
-    // Write back to file
-    writeFileSync(filePath, JSON.stringify(trashCans, null, 2));
+    // Write back to KV
+    await kv.set('trashcans', trashCans);
     
     console.log(`[PUT /api/trash-status/${id}] Successfully updated trash can:`, trashCans[trashCanIndex]);
     return NextResponse.json(trashCans[trashCanIndex]);
