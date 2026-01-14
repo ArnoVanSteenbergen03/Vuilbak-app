@@ -17,14 +17,23 @@ L.Icon.Default.mergeOptions({
     'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Custom trash can icon
-const trashCanIcon = new L.Icon({
-  iconUrl:
-    'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZjAwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMyA2aDE4Ii8+PHBhdGggZD0iTTE5IDZ2MTRjMCAxLTEgMi0yIDJIN2MtMSAwLTItMS0yLTJWNiIvPjxwYXRoIGQ9Ik04IDZWNGMwLTEgMS0yIDItMmg0YzEgMCAyIDEgMiAydjIiLz48L3N2Zz4=',
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-  popupAnchor: [0, -32],
-});
+// Function to create trash can icon with dynamic color based on status
+const getTrashCanIcon = (status: string) => {
+  const color = status.toLowerCase().includes('vol') || status.toLowerCase() === 'full' ? '#ff0000' : '#00aa00';
+  
+  // Create SVG with dynamic color
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`;
+  
+  // Encode to base64
+  const encoded = btoa(svg);
+  
+  return new L.Icon({
+    iconUrl: `data:image/svg+xml;base64,${encoded}`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
+  });
+};
 
 export interface TrashCan {
   id: number;
@@ -92,7 +101,7 @@ export default function TrashCanMap() {
           <Marker
             key={trashCan.id}
             position={[trashCan.lat, trashCan.lng]}
-            icon={trashCanIcon}
+            icon={getTrashCanIcon(trashCan.status)}
           >
             <Popup>
               <div className="p-2">

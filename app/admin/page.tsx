@@ -245,13 +245,13 @@ function AdminDashboard() {
                         onClick={() => handleAction('empty')}
                         className="w-full px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium text-lg"
                       >
-                        🟢 Niet Vol
+                        🟢 Not Full
                       </button>
                       <button
                         onClick={() => handleAction('full')}
                         className="w-full px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium text-lg"
                       >
-                        🔴 Vol
+                        🔴 Full
                       </button>
                     </div>
 
