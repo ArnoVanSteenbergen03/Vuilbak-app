@@ -115,7 +115,7 @@ export default function TrashCanMap() {
                   </span>
                 </p>
                 <p className="text-sm text-gray-600">
-                  Laatst geüpdatet: {trashCan.lastUpdated}
+                  Last update: {trashCan.lastUpdated}
                 </p>
               </div>
             </Popup>

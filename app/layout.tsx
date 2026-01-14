@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Vuilbakken Ghent - Realtime Status Kaart",
-  description: "A interactive map showing the real-time status of trash cans in Ghent.",
+  title: "Trash Can Ghent - Realtime Status Map",
+  description: "An interactive map showing the real-time status of trash cans in Ghent.",
 };
 
 export default function RootLayout({
